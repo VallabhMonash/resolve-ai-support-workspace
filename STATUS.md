@@ -2,13 +2,13 @@
 
 ## Current state
 
-Planning complete. Implementation not started. No cloud accounts were configured, resources provisioned, dependencies installed, models downloaded, database created, or benchmarks run.
+Planning is complete and M0 compatibility validation is in progress. Node/npm are pinned, the two local Ollama models are downloaded, and real structured-output, native tool-call and embedding checks have passed locally. No application feature code, cloud resources, database or benchmark suite has been created.
 
 ## Milestone tracker
 
 | Milestone | State | Evidence |
 |---|---|---|
-| M0 — compatibility and free-resource checks | Not started | — |
+| M0 — compatibility and free-resource checks | In progress | [Local compatibility evidence](docs/COMPATIBILITY.md) and [learning journal](docs/LEARNING-JOURNAL.md); tokenizer, dependency and hosted checks remain pending |
 | M1 — foundation and authentication | Not started | — |
 | M2 — ticket workspace and React workflows | Not started | — |
 | M3 — knowledge base and embeddings | Not started | — |
@@ -20,7 +20,7 @@ Planning complete. Implementation not started. No cloud accounts were configured
 
 ## Next action
 
-Execute M0 from docs/07-IMPLEMENTATION.md. Record exact dependency versions and real model capability results before building the rest of the system.
+Complete the remaining owner-led M0 tokenizer and Node/Vercel dependency checks. Then verify Neon and Cloudflare capabilities when credentials are available. Do not begin M1 until the local packaging/runtime checks are recorded.
 
 ## External inputs needed during implementation
 
@@ -39,3 +39,7 @@ Date / milestone / commit or file state / commands / passed checks / failed or s
 ## Planning verification
 
 See [planning review](docs/PLAN-REVIEW.md). Local document links and basic GraphQL contract checks passed; runtime/schema compilation and all implementation tests remain future work.
+
+## Evidence log
+
+2026-09-25 / M0 / working tree after commit `3f354f7` / pinned Node 24.21.0 and npm 11.19.0; exercised Ollama version, structured chat, native tool request, query/document embeddings and processor inspection / local structured output, tool request and 768-dimensional embeddings passed / tokenizer, package, Vercel, Neon and Cloudflare checks pending / `docs/COMPATIBILITY.md`, `docs/LEARNING-JOURNAL.md` / owner performs remaining tokenizer and Node/Vercel compatibility checks.
