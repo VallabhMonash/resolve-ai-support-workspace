@@ -1,0 +1,260 @@
+"""
+Resolve v1 design contract. No resolver implementation exists yet.
+All IDs are workspace-scoped by the server, including nested fields.
+"""
+scalar DateTime
+scalar JSON
+
+enum Role { MANAGER AGENT }
+enum WorkspaceKind { OWNER DEMO TEMPLATE }
+enum TicketStatus { OPEN IN_PROGRESS RESOLVED }
+enum TicketCategory { IMPORT_EXPORT ACCESS SYNC OTHER }
+enum TicketPriority { LOW NORMAL HIGH }
+enum CommentKind { INTERNAL_NOTE REPLY }
+enum IndexingStatus { PENDING RUNNING READY FAILED SUPERSEDED }
+enum AiAction { CLASSIFY DRAFT RELATED_TICKETS }
+enum AiRunState { RUNNING SUCCEEDED INSUFFICIENT_EVIDENCE FAILED }
+enum DraftOutcome { ANSWER INSUFFICIENT_EVIDENCE }
+
+type Workspace {
+  id: ID!
+  slug: String!
+  name: String!
+  kind: WorkspaceKind!
+  expiresAt: DateTime
+}
+type User {
+  id: ID!
+  displayName: String!
+  role: Role!
+}
+type Session {
+  user: User!
+  workspace: Workspace!
+  expiresAt: DateTime!
+}
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+}
+type TicketEdge { cursor: String! node: Ticket! }
+type TicketConnection { edges: [TicketEdge!]! pageInfo: PageInfo! }
+type CommentEdge { cursor: String! node: Comment! }
+type CommentConnection { edges: [CommentEdge!]! pageInfo: PageInfo! }
+type EventEdge { cursor: String! node: TicketEvent! }
+type EventConnection { edges: [EventEdge!]! pageInfo: PageInfo! }
+type ArticleEdge { cursor: String! node: Article! }
+type ArticleConnection { edges: [ArticleEdge!]! pageInfo: PageInfo! }
+
+type Ticket {
+  id: ID!
+  number: Int!
+  title: String!
+  description: String!
+  status: TicketStatus!
+  category: TicketCategory!
+  priority: TicketPriority!
+  assignee: User
+  createdBy: User!
+  version: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  resolvedAt: DateTime
+  comments(first: Int = 20, after: String): CommentConnection!
+  events(first: Int = 20, after: String): EventConnection!
+  recentAiRuns: [AiRun!]!
+}
+type Comment {
+  id: ID!
+  kind: CommentKind!
+  body: String!
+  author: User!
+  aiRunId: ID
+  createdAt: DateTime!
+}
+type TicketEvent {
+  id: ID!
+  actor: User!
+  eventType: String!
+  before: JSON
+  after: JSON
+  createdAt: DateTime!
+}
+type Article {
+  id: ID!
+  title: String!
+  version: Int!
+  currentVersion: ArticleVersion
+  currentIndexingJob: IndexingJob
+  archivedAt: DateTime
+  updatedAt: DateTime!
+  canEdit: Boolean!
+}
+type ArticleVersion {
+  id: ID!
+  articleId: ID!
+  versionNumber: Int!
+  title: String!
+  body: String!
+  createdAt: DateTime!
+  isCurrent: Boolean!
+}
+type IndexingJob {
+  id: ID!
+  articleVersionId: ID!
+  profileId: String!
+  status: IndexingStatus!
+  processedChunks: Int!
+  totalChunks: Int!
+  errorCode: String
+  updatedAt: DateTime!
+}
+type Classification {
+  summary: String!
+  category: TicketCategory!
+  priority: TicketPriority!
+  rationale: String!
+}
+type Citation {
+  id: ID!
+  sourceLabel: String!
+  articleVersionId: ID!
+  title: String!
+  excerpt: String!
+}
+type DraftParagraph {
+  text: String!
+  sourceLabels: [String!]!
+}
+type Draft {
+  outcome: DraftOutcome!
+  paragraphs: [DraftParagraph!]!
+  citations: [Citation!]!
+  missingInformation: [String!]!
+}
+type RelatedTicket {
+  ticket: Ticket!
+  resolutionExcerpt: String!
+}
+type RelatedTicketsResult {
+  summary: String!
+  toolName: String!
+  tickets: [RelatedTicket!]!
+}
+union AiResult = Classification | Draft | RelatedTicketsResult
+
+type AiUsage {
+  inputTokens: Int
+  outputTokens: Int
+  providerAttempts: Int!
+}
+type AiRun {
+  id: ID!
+  action: AiAction!
+  state: AiRunState!
+  ticketId: ID!
+  ticketVersion: Int!
+  provider: String!
+  model: String!
+  promptVersion: String!
+  result: AiResult
+  errorCode: String
+  durationMs: Int
+  usage: AiUsage!
+  createdAt: DateTime!
+}
+type CategoryCount { category: TicketCategory! count: Int! }
+type WorkspaceInsights {
+  windowStart: DateTime!
+  windowEnd: DateTime!
+  openCount: Int!
+  inProgressCount: Int!
+  resolvedCount: Int!
+  byCategory: [CategoryCount!]!
+  aiRunCount: Int!
+  aiSuccessCount: Int!
+  aiFailureCount: Int!
+  aiInsufficientEvidenceCount: Int!
+  aiLatencySampleCount: Int!
+  aiMedianDurationMs: Float
+  aiP95DurationMs: Float
+  helpfulCount: Int!
+  needsChangesCount: Int!
+}
+type CommentPayload { ticket: Ticket! comment: Comment! }
+type FeedbackPayload { aiRunId: ID! helpful: Boolean! }
+
+input LoginInput { workspaceSlug: String! email: String! password: String! }
+input TicketFilter {
+  search: String
+  status: TicketStatus
+  category: TicketCategory
+  priority: TicketPriority
+  assigneeId: ID
+  unassignedOnly: Boolean
+}
+input ArticleFilter { search: String archived: Boolean = false }
+input CreateTicketInput {
+  title: String!
+  description: String!
+  category: TicketCategory = OTHER
+  priority: TicketPriority = NORMAL
+  assigneeId: ID
+}
+input UpdateTicketInput {
+  id: ID!
+  expectedVersion: Int!
+  title: String
+  description: String
+  status: TicketStatus
+  category: TicketCategory
+  priority: TicketPriority
+  assigneeId: ID
+}
+input AddNoteInput { ticketId: ID! expectedVersion: Int! body: String! }
+input SaveReplyInput {
+  ticketId: ID!
+  expectedVersion: Int!
+  body: String!
+  aiRunId: ID
+}
+input SaveArticleInput {
+  id: ID
+  expectedVersion: Int
+  title: String!
+  body: String!
+}
+input ArchiveArticleInput { id: ID! expectedVersion: Int! }
+input AiActionInput { ticketId: ID! expectedVersion: Int! idempotencyKey: ID! }
+input AiFeedbackInput { aiRunId: ID! helpful: Boolean! note: String }
+
+type Query {
+  me: Session
+  assignees: [User!]!
+  tickets(filter: TicketFilter, first: Int = 20, after: String): TicketConnection!
+  ticket(id: ID!): Ticket
+  articles(filter: ArticleFilter, first: Int = 20, after: String): ArticleConnection!
+  article(id: ID!): Article
+  articleVersion(id: ID!): ArticleVersion
+  indexingJob(id: ID!): IndexingJob
+  aiRun(id: ID!): AiRun
+  insights: WorkspaceInsights!
+}
+type Mutation {
+  login(input: LoginInput!): Session!
+  logout: Boolean!
+  enterDemo: Session!
+  createTicket(input: CreateTicketInput!): Ticket!
+  updateTicket(input: UpdateTicketInput!): Ticket!
+  addNote(input: AddNoteInput!): CommentPayload!
+  saveReply(input: SaveReplyInput!): CommentPayload!
+  saveArticle(input: SaveArticleInput!): Article!
+  archiveArticle(input: ArchiveArticleInput!): Article!
+  startIndexing(articleVersionId: ID!): IndexingJob!
+  processIndexingBatch(jobId: ID!): IndexingJob!
+  classifyTicket(input: AiActionInput!): AiRun!
+  draftReply(input: AiActionInput!): AiRun!
+  findRelatedTickets(input: AiActionInput!): AiRun!
+  recordAiFeedback(input: AiFeedbackInput!): FeedbackPayload!
+}
+
