@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "outputDirectory": "compat/vercel-static",
+  "functions": {
+    "api/graphql.mjs": {
+      "maxDuration": 90,
+      "includeFiles": "assets/tokenizers/qwen3-4b-instruct-2507/**"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/((?!api(?:/|$)).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

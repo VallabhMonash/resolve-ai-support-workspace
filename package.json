@@ -9,9 +9,14 @@
   },
   "packageManager": "npm@11.19.0",
   "dependencies": {
-    "@huggingface/tokenizers": "0.2.0"
+    "@huggingface/tokenizers": "0.2.0",
+    "drizzle-orm": "0.45.3",
+    "graphql": "17.0.2",
+    "graphql-yoga": "5.24.1",
+    "pg": "8.23.0"
   },
   "scripts": {
-    "compat:tokenizer": "node scripts/check-tokenizer.mjs"
+    "compat:tokenizer": "node scripts/check-tokenizer.mjs",
+    "compat:backend": "node scripts/check-backend-runtime.mjs"
   }
 }
