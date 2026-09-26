@@ -127,10 +127,60 @@ A Node 24 compatibility script encoded the ParcelDesk CSV example into 12 intege
 | Local assets included in npm package | Passed |
 | Model asset licence retained | Passed |
 
+## Node backend compatibility check
+
+The local backend compatibility harness pins and imports:
+
+| Package | Version |
+|---|---|
+| `graphql-yoga` | `5.24.1` |
+| `graphql` | `17.0.2` |
+| `drizzle-orm` | `0.45.3` |
+| `pg` | `8.23.0` |
+
+On Node `24.21.0`, GraphQL Yoga executed an injected GraphQL request and returned HTTP 200 with the expected response. Drizzle generated a parameterised PostgreSQL query containing an explicit `workspace_id = $1` predicate and the expected workspace UUID parameter. The `pg` pool and Drizzle client were instantiated without opening a database connection; real database connectivity remains a separate Neon/Docker check.
+
+The production dependency audit reported zero known vulnerabilities after the compatibility dependencies were installed.
+
+## Vercel Hobby compatibility check
+
+The Vercel API reported the active `vallabh-shelars-projects` account plan as `hobby`. The repository was linked to the free Vercel project `resolve-ai-support-workspace` without enabling a paid plan or trial.
+
+A local Vercel build using the Node 24 runtime completed in approximately 2 seconds. The generated output measured 7.0 MB, including a 6.9 MB GraphQL function bundle, below Vercel's 250 MB uncompressed function limit. Its function manifest recorded:
+
+- runtime `nodejs24.x`;
+- 90-second maximum duration;
+- all three pinned Qwen tokenizer assets in `filePathMap`.
+
+Local routing checks confirmed:
+
+- `POST /api/graphql` returned GraphQL JSON with HTTP 200;
+- `/tickets/example` returned the SPA entry document with HTTP 200;
+- `/api/not-a-function` returned HTTP 404 rather than the SPA document.
+
+The initial catch-all rewrite also served the SPA for unknown `/api/*` paths. The rewrite was corrected with an API-excluding negative lookahead and all three routes were retested.
+
+The public Hobby compatibility deployment is available at `https://resolve-ai-support-workspace.vercel.app`. The deployed GraphQL function reported Node `24.20.0`, which satisfies the repository's `24.x` engine constraint, and successfully loaded the packaged Qwen tokenizer to reproduce the expected 12-token count.
+
+Observed public requests immediately after deployment:
+
+| Request | HTTP result | Total latency |
+|---|---:|---:|
+| First GraphQL tokenizer request | 200 | 1,687.84 ms |
+| Immediate repeated request | 200 | 671.22 ms |
+| SPA route | 200, HTML | Not recorded |
+| Unknown API route | 404, text | Not recorded |
+
+These are two compatibility observations, not a latency benchmark or customer-impact claim.
+
+Vercel initially blocked later deployments because the existing Git commit author email did not match the verified Vercel account email. The repository-local Git email was changed to the already verified Vercel email, without altering global Git configuration, and a new commit deployed successfully.
+
+Vercel CLI `59.16.0` introduced known vulnerabilities through its development-only transitive dependency tree when installed in the repository. It was removed from `package.json` and `package-lock.json`, restoring a zero-vulnerability project audit. M0 used the exact external invocation `npx --yes vercel@59.16.0`; this CLI limitation must be rechecked before Jenkins is implemented. Do not run `npm audit fix --force`, which proposed unrelated CLI downgrades.
+
+The attempted automatic GitHub connection did not succeed. This does not affect authenticated CLI deployments and avoids creating a duplicate automatic deployment path before the Jenkins milestone.
+
 ## M0 checks still pending
 
-- Node/GraphQL Yoga/Drizzle/`pg` compatibility under the selected Vercel runtime.
-- Vercel Hobby GraphQL handler, CLI deployment and same-origin SPA rewrite checks.
 - Neon Free pooled Node connection and `pgvector` extension check when credentials exist.
 - Cloudflare Free generation, structured output, native tool calling, embeddings, quotas and token-limit checks when credentials exist.
 - Memory-pressure observation with the normal development toolset open.

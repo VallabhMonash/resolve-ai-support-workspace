@@ -79,3 +79,44 @@ The tokenizer converts text into the same integer token units expected by Qwen. 
 ### Next learning exercise
 
 Verify the Node/Vercel dependency and packaging path separately. This remains pending and is not recorded as completed.
+
+## 2026-09-26 — Node, GraphQL and Vercel compatibility
+
+### Problem and intended behaviour
+
+Resolve needs one Node 24 backend dependency set that can execute GraphQL, generate safe PostgreSQL queries, run as a Vercel Function on the free Hobby plan, package local tokenizer assets, and serve an SPA without sending unknown API paths to the browser application.
+
+### AI coding assistance used
+
+Codex checked current package and platform documentation, selected stable compatible versions, supplied a backend compatibility harness, created the Vercel entrypoint and routing fixture, and interpreted local and hosted results. The owner installed the packages, authenticated Vercel and verified the Hobby plan before a project was created.
+
+### Mistakes or limitations found
+
+The first SPA catch-all also returned the HTML application for an unknown `/api/*` request. A negative-lookahead rewrite excluded the API namespace; the real GraphQL path continued to return JSON, the client route returned HTML and the unknown API route returned 404.
+
+Vercel blocked two deployments because the Git commit author did not match the verified Vercel identity. The repository-local email was aligned with the existing verified account email, a new commit was made, and the next deployment reached `READY`. Global Git identity was not changed.
+
+Installing Vercel CLI as a development dependency introduced CLI-only audit findings, including high and critical transitive findings. Downgrading did not resolve them. The CLI was removed from the project dependency tree, restoring a zero-vulnerability audit; the exact CLI version was invoked externally for M0 and must be reassessed before Jenkins.
+
+### Work completed by the owner
+
+The owner inspected the published Node engine and peer-dependency requirements, installed the exact backend packages, created and ran the backend compatibility harness, logged into Vercel and confirmed the active team was on Hobby.
+
+Codex completed the large build-manifest inspection, live routing checks, deployment diagnosis, safe repository-local identity correction, production smoke test and evidence updates after the owner explicitly requested that work be performed directly.
+
+### Reproducible checks and observations
+
+- `npm run compat:backend` executed GraphQL successfully and generated a parameterised workspace-scoped SQL query.
+- `npm audit` reported zero known vulnerabilities after Vercel CLI was removed from the repository dependency tree.
+- `npx --yes vercel@59.16.0 build --prod --yes` produced a 7.0 MB build with a 6.9 MB function bundle and mapped all tokenizer files.
+- The public GraphQL function ran on Node `24.20.0` and returned a tokenizer count of 12.
+- The first post-deployment GraphQL request measured 1,687.84 ms; the immediate repeat measured 671.22 ms.
+- A client-side route returned the SPA document with HTTP 200, while an unknown API route returned HTTP 404.
+
+### Owner explanation
+
+The same GraphQL Yoga instance can receive a Web `Request` locally and inside Vercel's Node Function runtime. Vercel packages the handler and its dependencies, while `includeFiles` adds non-code tokenizer assets that automatic code tracing cannot infer reliably.
+
+### Next learning exercise
+
+Explain why every database query must receive workspace scope from authenticated server context rather than accepting a model- or browser-supplied workspace ID. The real database isolation implementation remains an M1 task.
