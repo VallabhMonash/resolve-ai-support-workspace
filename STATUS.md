@@ -8,7 +8,7 @@ Planning is complete and M0 compatibility validation is in progress. Node/npm an
 
 | Milestone | State | Evidence |
 |---|---|---|
-| M0 — compatibility and free-resource checks | In progress | [Compatibility evidence](docs/COMPATIBILITY.md) and [learning journal](docs/LEARNING-JOURNAL.md); local AI, tokenizer, Node backend and Vercel checks passed; Neon, Cloudflare and memory checks remain pending |
+| M0 — compatibility and free-resource checks | In progress | [Compatibility evidence](docs/COMPATIBILITY.md) and [learning journal](docs/LEARNING-JOURNAL.md); local AI, tokenizer, Node backend, Vercel and memory checks passed; Neon and Cloudflare remain pending |
 | M1 — foundation and authentication | Not started | — |
 | M2 — ticket workspace and React workflows | Not started | — |
 | M3 — knowledge base and embeddings | Not started | — |
@@ -20,7 +20,7 @@ Planning is complete and M0 compatibility validation is in progress. Node/npm an
 
 ## Next action
 
-Verify Neon Free pooled connectivity and `pgvector`, Cloudflare Free AI capabilities and local memory pressure with the normal development tools open. Do not treat the compatibility-only public page as the completed Resolve application.
+Verify Neon Free pooled connectivity and `pgvector`, then Cloudflare Free AI capabilities. Do not treat the compatibility-only public page as the completed Resolve application.
 
 ## External inputs needed during implementation
 
@@ -46,4 +46,6 @@ See [planning review](docs/PLAN-REVIEW.md). Local document links and basic Graph
 
 2026-09-26 / M0 / working tree after commit `237eda7` / pinned `@huggingface/tokenizers@0.2.0`; verified Qwen asset checksums; ran encode/decode online and with network denied; inspected npm dry-run manifest / 12-token round trip and local asset packaging passed / Node/Vercel, Neon and Cloudflare checks pending / `scripts/check-tokenizer.mjs`, `assets/tokenizers/qwen3-4b-instruct-2507`, `docs/COMPATIBILITY.md`, `docs/LEARNING-JOURNAL.md` / owner performs the remaining dependency and hosted checks.
 
-2026-09-26 / M0 / commit `a6cf563` plus deployed compatibility state / pinned GraphQL Yoga, GraphQL, Drizzle and `pg`; executed local GraphQL and SQL-generation harness; confirmed Vercel Hobby; built and deployed Node 24 GraphQL function; exercised packaged tokenizer and routing publicly / backend imports, GraphQL execution, parameterised workspace filter, 12-token hosted count, SPA fallback and API exclusion passed; production dependency audit reported zero vulnerabilities / Neon, Cloudflare and memory-pressure checks pending; Vercel CLI transitive audit limitation recorded / `api/graphql.mjs`, `scripts/check-backend-runtime.mjs`, `vercel.json`, `docs/COMPATIBILITY.md`, `docs/LEARNING-JOURNAL.md`, `https://resolve-ai-support-workspace.vercel.app` / verify remaining M0 provider checks.
+2026-09-26 / M0 / commit `a6cf563` plus deployed compatibility state / pinned GraphQL Yoga, GraphQL, Drizzle and `pg`; executed local GraphQL and SQL-generation harness; confirmed Vercel Hobby; built and deployed Node 24 GraphQL function; exercised packaged tokenizer and routing publicly / backend imports, GraphQL execution, parameterised workspace filter, 12-token hosted count, SPA fallback and API exclusion passed; production dependency audit reported zero vulnerabilities / Neon and Cloudflare pending; memory pressure recorded separately; Vercel CLI transitive audit limitation recorded / `api/graphql.mjs`, `scripts/check-backend-runtime.mjs`, `vercel.json`, `docs/COMPATIBILITY.md`, `docs/LEARNING-JOURNAL.md`, `https://resolve-ai-support-workspace.vercel.app` / verify remaining M0 provider checks.
+
+2026-09-26 / M0 / commit `759ffff` plus local runtime state / measured 16 GiB Mac memory before and during simultaneous Qwen and EmbeddingGemma residency / both models ran with 100% GPU assignment; free memory changed from 57% to 26%; zero throttled pages; both requests passed / sustained stress testing not performed / `docs/COMPATIBILITY.md`, `docs/LEARNING-JOURNAL.md` / models unloaded; verify Neon and Cloudflare.

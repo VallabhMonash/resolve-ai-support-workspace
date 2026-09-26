@@ -179,10 +179,24 @@ Vercel CLI `59.16.0` introduced known vulnerabilities through its development-on
 
 The attempted automatic GitHub connection did not succeed. This does not affect authenticated CLI deployments and avoids creating a duplicate automatic deployment path before the Jenkins milestone.
 
+## Local memory-pressure check
+
+The Mac reported 16 GiB of physical memory. With the current development applications open and no Ollama model loaded, `memory_pressure -Q` reported 57% system-wide free memory.
+
+Qwen and EmbeddingGemma were then loaded together with a five-minute keep-alive:
+
+| Model | Ollama memory | Processor | Context |
+|---|---:|---|---:|
+| `qwen3:4b-instruct-2507-q4_K_M` | 3.2 GB | 100% GPU | 4,096 |
+| `embeddinggemma:300m` | 679 MB | 100% GPU | 2,048 |
+
+With both models resident, system-wide free memory was 26%, macOS reported zero throttled pages, and both requests completed. The short Qwen request measured 2,234.00 ms total with 2,077.65 ms model loading; the embedding request measured 1,092.83 ms total with 1,054.55 ms model loading and returned 768 dimensions.
+
+This is a point-in-time development-machine observation, not a sustained stress test. Both models were explicitly unloaded after measurement.
+
 ## M0 checks still pending
 
 - Neon Free pooled Node connection and `pgvector` extension check when credentials exist.
 - Cloudflare Free generation, structured output, native tool calling, embeddings, quotas and token-limit checks when credentials exist.
-- Memory-pressure observation with the normal development toolset open.
 
 These pending checks do not invalidate the completed local model evidence and do not yet establish hosted readiness.

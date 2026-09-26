@@ -120,3 +120,7 @@ The same GraphQL Yoga instance can receive a Web `Request` locally and inside Ve
 ### Next learning exercise
 
 Explain why every database query must receive workspace scope from authenticated server context rather than accepting a model- or browser-supplied workspace ID. The real database isolation implementation remains an M1 task.
+
+### Local resource observation
+
+With both selected Ollama models loaded together, Qwen used 3.2 GB and EmbeddingGemma used 679 MB with 100% GPU assignment. System-wide free memory changed from 57% before loading to 26% with both models resident, with zero throttled pages reported. Both models were stopped after the measurement.
