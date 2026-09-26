@@ -2,13 +2,13 @@
 
 ## Current state
 
-Planning is complete and M0 compatibility validation is in progress. Node/npm are pinned, the two local Ollama models are downloaded, and real structured-output, native tool-call and embedding checks have passed locally. No application feature code, cloud resources, database or benchmark suite has been created.
+Planning is complete and M0 compatibility validation is in progress. Node/npm and the Qwen tokenizer package are pinned; the tokenizer works offline from packaged assets; and real structured-output, native tool-call and embedding checks have passed locally. No application feature code, cloud resources, database or benchmark suite has been created.
 
 ## Milestone tracker
 
 | Milestone | State | Evidence |
 |---|---|---|
-| M0 — compatibility and free-resource checks | In progress | [Local compatibility evidence](docs/COMPATIBILITY.md) and [learning journal](docs/LEARNING-JOURNAL.md); tokenizer, dependency and hosted checks remain pending |
+| M0 — compatibility and free-resource checks | In progress | [Local compatibility evidence](docs/COMPATIBILITY.md) and [learning journal](docs/LEARNING-JOURNAL.md); tokenizer passed, dependency and hosted checks remain pending |
 | M1 — foundation and authentication | Not started | — |
 | M2 — ticket workspace and React workflows | Not started | — |
 | M3 — knowledge base and embeddings | Not started | — |
@@ -20,7 +20,7 @@ Planning is complete and M0 compatibility validation is in progress. Node/npm ar
 
 ## Next action
 
-Complete the remaining owner-led M0 tokenizer and Node/Vercel dependency checks. Then verify Neon and Cloudflare capabilities when credentials are available. Do not begin M1 until the local packaging/runtime checks are recorded.
+Complete the remaining owner-led M0 Node/Vercel dependency checks. Then verify Neon and Cloudflare capabilities when credentials are available. Do not begin M1 until the local packaging/runtime checks are recorded.
 
 ## External inputs needed during implementation
 
@@ -43,3 +43,5 @@ See [planning review](docs/PLAN-REVIEW.md). Local document links and basic Graph
 ## Evidence log
 
 2026-09-25 / M0 / working tree after commit `3f354f7` / pinned Node 24.21.0 and npm 11.19.0; exercised Ollama version, structured chat, native tool request, query/document embeddings and processor inspection / local structured output, tool request and 768-dimensional embeddings passed / tokenizer, package, Vercel, Neon and Cloudflare checks pending / `docs/COMPATIBILITY.md`, `docs/LEARNING-JOURNAL.md` / owner performs remaining tokenizer and Node/Vercel compatibility checks.
+
+2026-09-26 / M0 / working tree after commit `237eda7` / pinned `@huggingface/tokenizers@0.2.0`; verified Qwen asset checksums; ran encode/decode online and with network denied; inspected npm dry-run manifest / 12-token round trip and local asset packaging passed / Node/Vercel, Neon and Cloudflare checks pending / `scripts/check-tokenizer.mjs`, `assets/tokenizers/qwen3-4b-instruct-2507`, `docs/COMPATIBILITY.md`, `docs/LEARNING-JOURNAL.md` / owner performs the remaining dependency and hosted checks.

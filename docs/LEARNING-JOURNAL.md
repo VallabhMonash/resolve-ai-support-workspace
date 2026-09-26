@@ -41,3 +41,41 @@ The embedding model does not write the answer. It converts the ticket query and 
 ### Next learning exercise
 
 During the remaining M0 work, the owner will verify tokenizer packaging and the selected Node/Vercel dependency path. This item remains pending and is not recorded as completed.
+
+The tokenizer portion was subsequently completed and is recorded in the 2026-09-26 entry below. The Node/Vercel dependency path remains pending.
+
+## 2026-09-26 — Local Qwen tokenizer packaging
+
+### Problem and intended behaviour
+
+Resolve must count tokens and enforce model input limits without downloading tokenizer files during an application request. Token counts also provide the future RAG chunking and prompt-budget boundaries.
+
+### AI coding assistance used
+
+Codex explained the role of model-matched tokenization, identified the official `@huggingface/tokenizers` package and supplied a small compatibility script. The owner received the exact Qwen model revision, expected tokenizer checksum, offline test and packaging inspection commands.
+
+### Mistake or limitation found
+
+An npm dry run warned that no `.npmignore` file existed and that `.gitignore` was used for file exclusion. Resolve is a private application and is not being published as an npm library, so the warning did not justify adding an unnecessary publish configuration file. The dry-run manifest was inspected directly instead.
+
+This check proves npm packaging includes the assets. It does not prove Vercel serverless file tracing includes them; that remains a separate M0 check.
+
+### Work completed by the owner
+
+The owner installed and pinned `@huggingface/tokenizers@0.2.0`, downloaded the Qwen tokenizer files and licence from a pinned model revision, verified their checksums, created the compatibility script, and ran the online, network-denied and packaging checks.
+
+### Reproducible checks and observations
+
+- `npm run compat:tokenizer` encoded the CSV example into 12 integer token IDs and decoded the exact original text.
+- The same command passed under `sandbox-exec` with all network access denied.
+- `tokenizer.json` matched SHA-256 `aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4`.
+- `npm pack --dry-run --json` listed all three tokenizer assets.
+- The dry-run package measured 2,102,746 bytes compressed and 11,545,859 bytes unpacked.
+
+### Owner explanation
+
+The tokenizer converts text into the same integer token units expected by Qwen. Resolve uses those counts to split documents and keep prompts inside configured limits; the tokenizer itself does not generate an answer or run the LLM.
+
+### Next learning exercise
+
+Verify the Node/Vercel dependency and packaging path separately. This remains pending and is not recorded as completed.

@@ -7,5 +7,11 @@
   "engines": {
     "node": "24.x"
   },
-  "packageManager": "npm@11.19.0"
+  "packageManager": "npm@11.19.0",
+  "dependencies": {
+    "@huggingface/tokenizers": "0.2.0"
+  },
+  "scripts": {
+    "compat:tokenizer": "node scripts/check-tokenizer.mjs"
+  }
 }

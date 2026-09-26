@@ -107,9 +107,28 @@ Immediately after the warm run, `ollama ps` reported:
 
 The processor value means Ollama assigned model execution entirely to the GPU; it is not a measurement of continuous GPU utilisation.
 
+## Tokenizer compatibility check
+
+The project pins `@huggingface/tokenizers` version `0.2.0` and stores the Qwen tokenizer assets locally under `assets/tokenizers/qwen3-4b-instruct-2507`.
+
+The assets are pinned to Qwen model revision `f50518eb58dfc750271b273fc113bdfc16ec2280`. The SHA-256 checksum of `tokenizer.json` is:
+
+`aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4`
+
+A Node 24 compatibility script encoded the ParcelDesk CSV example into 12 integer token IDs and decoded them back to the exact original text. The same check passed under macOS `sandbox-exec` with all network access denied.
+
+`npm pack --dry-run` included the licence, tokenizer configuration and 11,422,654-byte tokenizer file. The resulting package was 2,102,746 bytes compressed and 11,545,859 bytes unpacked.
+
+| Check | Result |
+|---|---|
+| Node 24 tokenizer loading | Passed |
+| Encode/decode round trip | Passed |
+| Runtime network required | No |
+| Local assets included in npm package | Passed |
+| Model asset licence retained | Passed |
+
 ## M0 checks still pending
 
-- Package and tokenizer version selection and tokenizer-asset packaging.
 - Node/GraphQL Yoga/Drizzle/`pg` compatibility under the selected Vercel runtime.
 - Vercel Hobby GraphQL handler, CLI deployment and same-origin SPA rewrite checks.
 - Neon Free pooled Node connection and `pgvector` extension check when credentials exist.
