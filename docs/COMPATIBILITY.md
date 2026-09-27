@@ -1,6 +1,6 @@
 # Compatibility and capability evidence
 
-This document records measured M0 evidence for Resolve. A capability is marked as passed only when it was exercised against the real component. Unrun cloud and packaging checks remain pending.
+This document records measured M0 evidence for Resolve. A capability is marked as passed only when it was exercised against the real component. Local and hosted checks were completed against the selected free-resource profiles; later milestones still require application-level evaluation and load testing.
 
 ## Local environment
 
@@ -194,9 +194,60 @@ With both models resident, system-wide free memory was 26%, macOS reported zero 
 
 This is a point-in-time development-machine observation, not a sustained stress test. Both models were explicitly unloaded after measurement.
 
-## M0 checks still pending
+## Neon Free compatibility check
 
-- Neon Free pooled Node connection and `pgvector` extension check when credentials exist.
-- Cloudflare Free generation, structured output, native tool calling, embeddings, quotas and token-limit checks when credentials exist.
+A Neon Free project was created without enabling a paid plan. The application uses the pooled endpoint and explicit `sslmode=verify-full` certificate and hostname verification. The compatibility harness connects through `pg`, exercises a real Drizzle query and creates a transaction-scoped temporary `vector(768)` table so no application schema remains afterward.
 
-These pending checks do not invalidate the completed local model evidence and do not yet establish hosted readiness.
+| Check | Result |
+|---|---|
+| Pooled endpoint detected | Passed |
+| PostgreSQL version | `18.6 (6569466)` |
+| pgvector version | `0.8.6` |
+| Stored vector dimensions | 768 |
+| Real Drizzle query | Returned integer `1` |
+| Explicit TLS verification | Passed without warning |
+
+Observed connection runs:
+
+| Run | Connection latency | Total latency |
+|---|---:|---:|
+| Initial run | 1,050.50 ms | 1,735.37 ms |
+| Immediate repeat | 304.23 ms | 682.87 ms |
+| Repeat after `verify-full` change | 305.04 ms | 718.71 ms |
+
+These are compatibility observations from a development laptop rather than a database benchmark. The first run can include Neon scale-to-zero resume time and network establishment.
+
+## Cloudflare Workers AI Free compatibility check
+
+The Cloudflare account remained on Workers Free. Current provider documentation records a hard free allocation of 10,000 Neurons per day; Free requests fail after the allowance rather than generating usage charges. Wrangler `4.119.0` authenticated through OAuth, while the Node compatibility harness used a separately created Workers AI token stored only in the ignored `.env.local` file. No token or account identifier is printed by the harness.
+
+The hosted profile exercised three real model endpoints:
+
+| Purpose | Model | Verified capability |
+|---|---|---|
+| Structured generation | `@cf/meta/llama-3.1-8b-instruct` | JSON-schema ticket classification |
+| Native tool selection | `@cf/qwen/qwen3-30b-a3b-fp8` | `findSimilarTickets` with validated arguments |
+| Embeddings | `@cf/baai/bge-base-en-v1.5` | Two numeric 768-dimensional vectors using `cls` pooling |
+
+Two successful end-to-end compatibility runs produced:
+
+| Measurement | Run 1 | Run 2 |
+|---|---:|---:|
+| Structured-output latency | 672.43 ms | 1,471.76 ms |
+| Tool-call latency | 1,409.37 ms | 1,218.55 ms |
+| Embedding latency | 254.14 ms | 267.65 ms |
+| Total sequential latency | 2,336.60 ms | 2,958.68 ms |
+| Structured category / priority | `IMPORT_EXPORT` / `HIGH` | `IMPORT_EXPORT` / `HIGH` |
+| Tool name / limit | `findSimilarTickets` / `3` | `findSimilarTickets` / `3` |
+| Vector dimensions | 768, 768 | 768, 768 |
+| Vector norms | 0.999779, 0.999981 | 0.999779, 0.999981 |
+
+The first tool-call attempt used `max_tokens: 160`. Qwen chose the correct tool and began its JSON arguments, but reasoning plus the tool payload exhausted the limit. Cloudflare returned `finish_reason: length`, partial `<tool_call>` text and an empty native `tool_calls` array. The harness correctly rejected that response. Raising only the tool-call allowance to 512 produced a complete native call on both subsequent runs. The failed tool request reported approximately 5.87 Neurons.
+
+Hosted timings varied between repeats, so they are provider compatibility observations rather than cold/warm or performance claims. Cloudflare owns the hosted models' internal tokenization. The bundled Qwen tokenizer remains the local-profile budgeting implementation; hosted limits and returned usage must be handled through the hosted provider adapter.
+
+EmbeddingGemma and BGE both output 768 values, allowing the same PostgreSQL column shape, but their vector spaces are not interchangeable. Each retrieval index and query must use the same embedding profile; changing profiles requires re-embedding the stored chunks.
+
+## M0 outcome
+
+All frozen M0 compatibility checks passed: local structured generation, native tool calling, embeddings, offline tokenization, Node/GraphQL/Drizzle, Vercel Hobby packaging and routing, laptop memory, Neon Free pooled PostgreSQL with pgvector, and Cloudflare Workers AI Free hosted capabilities. This establishes feasibility on the zero-spend architecture. It does not establish application correctness, retrieval quality, sustained performance or final resume metrics; those require M1-M8 implementation and evaluation.

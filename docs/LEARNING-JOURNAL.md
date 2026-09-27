@@ -124,3 +124,44 @@ Explain why every database query must receive workspace scope from authenticated
 ### Local resource observation
 
 With both selected Ollama models loaded together, Qwen used 3.2 GB and EmbeddingGemma used 679 MB with 100% GPU assignment. System-wide free memory changed from 57% before loading to 26% with both models resident, with zero throttled pages reported. Both models were stopped after the measurement.
+
+## 2026-09-27 — Neon and hosted Workers AI compatibility
+
+### Problem and intended behaviour
+
+Resolve needs a zero-spend hosted profile that preserves the local application contract: PostgreSQL vector storage, schema-shaped classification, native read-only tool requests and 768-dimensional retrieval embeddings. The deployed Node backend must call these services over standard pooled PostgreSQL and HTTPS connections without exposing credentials.
+
+### AI coding assistance used
+
+Codex checked current Neon and Cloudflare documentation, explained pooled database connections and pgvector, selected documented free hosted models, and supplied compatibility harnesses that validate real outputs without printing secrets. The owner created the provider resources, stored credentials in the ignored `.env.local` file, ran the checks and supplied the observed non-secret results.
+
+### Mistakes or limitations found
+
+The initial Cloudflare tool request limited generation to 160 tokens. Qwen selected `findSimilarTickets` and began the correct JSON arguments, but its reasoning and tool payload reached the limit before the JSON closed. Cloudflare returned `finish_reason: length`, partial `<tool_call>` text and no native tool call. The harness rejected it. Raising the tool-call allowance to 512 let Cloudflare return a complete native call twice without weakening validation or parsing tool-like prose.
+
+A first Workers AI token was pasted into the conversation. It was treated as compromised, immediately revoked and replaced. The replacement was stored only in `.env.local` and was never printed, committed or added to documentation.
+
+### Work completed by the owner
+
+The owner created the Neon Free database, enabled pgvector, selected a pooled connection, changed the connection to explicit `sslmode=verify-full`, authenticated Wrangler, created and rotated the scoped Workers AI token, wrote both compatibility scripts, changed the tool-call limit from 160 to 512, and ran the successful checks twice where requested.
+
+### Reproducible checks and observations
+
+- `npm run compat:neon` connected through the pooled endpoint, reported PostgreSQL `18.6`, pgvector `0.8.6`, stored 768 dimensions and completed a real Drizzle query.
+- The first Neon run measured 1,735.37 ms total; the immediate repeat measured 682.87 ms. The explicit `verify-full` repeat measured 718.71 ms without the future SSL-semantics warning.
+- `npm run compat:cloudflare` returned schema-valid `IMPORT_EXPORT` / `HIGH` classification output.
+- The hosted Qwen model returned a native `findSimilarTickets` call with the requested query and limit 3 after the token-limit correction.
+- BGE returned two numeric vectors of 768 dimensions with `cls` pooling and norms near 1.
+- Two successful sequential hosted runs measured 2,336.60 ms and 2,958.68 ms total. These are compatibility observations rather than a performance benchmark.
+- `npm audit` reported zero known vulnerabilities and `git diff --check` passed.
+- The final non-interactive shell initially resolved the older system Node 22 binary. The suite was rerun explicitly through fnm on Node `24.21.0`; tokenizer, backend, Neon and Cloudflare checks all passed on the pinned runtime.
+
+### Owner explanation
+
+The first Cloudflare response was not a valid native tool call because the configured output limit cut off the model's reasoning and JSON before completion. The visible `<tool_call>` text showed the model's intent, but the incomplete payload could not populate Cloudflare's native `tool_calls` field. Increasing the limit allowed the model to close the payload and the provider to return a validated native call.
+
+The owner also explained the AI flow: the tokenizer converts text into countable model units so the application can split and budget input; the embedding model places queries and passages on a learned meaning map; vector search retrieves nearby passages; and the LLM receives the original retrieved text to classify or draft an answer. Embeddings from different models remain separate even when both contain 768 values.
+
+### Next learning exercise
+
+In M1, explain why every database operation must derive `workspace_id` from authenticated server context instead of accepting a browser- or model-supplied workspace identifier, then verify the rule with an isolation test.

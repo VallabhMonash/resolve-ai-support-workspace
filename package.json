@@ -18,6 +18,7 @@
   "scripts": {
     "compat:tokenizer": "node scripts/check-tokenizer.mjs",
     "compat:backend": "node scripts/check-backend-runtime.mjs",
-    "compat:neon": "node --env-file=.env.local scripts/check-neon-runtime.mjs"
+    "compat:neon": "node --env-file=.env.local scripts/check-neon-runtime.mjs",
+    "compat:cloudflare": "node --env-file=.env.local scripts/check-cloudflare-ai.mjs"
   }
 }

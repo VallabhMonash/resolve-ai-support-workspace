@@ -42,7 +42,6 @@ When a free service is unavailable, preserve local progress and report the exact
 Do not use a paid trial as a temporary workaround. Do not replace live AI with recorded output without explicit labelling and an unresolved feature status.
 When specifications conflict, use frozen scope first, then architecture/data/AI/API contracts; fix the inconsistency in documents and record the reason before continuing.
 
-## Suggested first coding message
+## Suggested next coding message
 
-Read the project handoff and implement M0 followed by M1. Carry out routine decisions autonomously, preserve all zero-spend constraints, and keep STATUS.md updated. Explain the meaningful decisions and provide the first runnable local slice with verification evidence. Do not change the scope or claim model/hosting tests passed unless you ran them.
-
+Read STATUS.md and the project handoff, then implement M1 foundation and authentication. M0 compatibility is complete; retain its scripts and measured evidence. Carry out routine decisions autonomously, preserve all zero-spend constraints, and keep STATUS.md updated. Explain meaningful decisions and provide the first runnable application slice with verification evidence. Do not redesign the product or treat the compatibility-only deployment as the finished application.
