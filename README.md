@@ -1,9 +1,15 @@
 # Resolve — implementation handoff
 
-**Status: scope and design frozen; application implementation has not started.**
+**Status: M0 complete. Next: M1 — application foundation and authentication.**
 Prepared 10 September 2026 for a personal, non-commercial portfolio project.
 
 Resolve is a support workspace for a fictional SaaS product called **ParcelDesk** (a small order-management application). Support staff manage tickets and documentation, then use an LLM to summarise/classify tickets, retrieve relevant documentation through a custom RAG pipeline, draft cited replies, and call one controlled ticket-search tool.
+
+## Start here for understanding and revision
+
+Read the **[Project recipe and revision guide](docs/PROJECT-GUIDE.md)** first. It explains the product, AI concepts and every phase in plain language, with steps, expected results and interview explanations.
+
+Check **[STATUS.md](STATUS.md)** for actual progress. The detailed documents below are references for implementation; you do not need to read them all to revise the project.
 
 ## Fixed stack
 
@@ -35,7 +41,7 @@ All M0–M8 acceptance checks pass or have a specifically documented external bl
 
 ## Next implementation prompt
 
-> Read AGENTS.md, README.md, STATUS.md, and docs/08-HANDOFF.md. Implement Resolve according to the frozen scope and contracts. Start with M0 and then work through the milestones in order. Preserve the zero-spend requirement. Verify provider capabilities before relying on them; do not silently remove live AI or tool calling. Keep STATUS.md current, record test evidence, and include the learning exercise at each AI milestone. Do not redesign the product or add features. Application implementation is now authorised; ask only for genuinely missing credentials or an unavoidable scope/cost decision.
+> Read AGENTS.md, README.md, STATUS.md, and docs/08-HANDOFF.md. Implement Resolve according to the frozen scope and contracts. M0 is complete; start with M1 and then work through the remaining milestones in order. Preserve the zero-spend requirement. Verify provider capabilities before relying on them; do not silently remove live AI or tool calling. Keep STATUS.md current, record test evidence, and include the learning exercise at each AI milestone. Do not redesign the product or add features. Application implementation is now authorised; ask only for genuinely missing credentials or an unavoidable scope/cost decision.
 
 The prompt above is for a future coding turn; this handoff itself contains specifications, not a completed app.
 

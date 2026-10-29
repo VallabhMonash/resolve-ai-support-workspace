@@ -1,5 +1,7 @@
 # Resolve learning journal
 
+For a plain-language explanation of the concepts and the phase-by-phase recipe, start with the [Project guide](PROJECT-GUIDE.md). This journal preserves the historical exercises, failures, fixes and measured evidence; the guide is the main revision document.
+
 ## 2026-09-25 — Local LLM capabilities and embeddings
 
 ### Problem and intended behaviour
